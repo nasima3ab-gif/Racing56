@@ -65,6 +65,35 @@ if (saveBackendBtn) {
 const socket = backendReady
   ? io(backendUrl, { transports: ["websocket", "polling"] })
   : { on: () => {}, emit: () => {}, id: null };
+let socketConnected = false;
+
+function updateConnectionState(connected, message, mode) {
+  socketConnected = connected;
+  if (connected) {
+    findMatchBtn.disabled = false;
+    leaveQueueBtn.disabled = false;
+    setStatus("Connected");
+  } else {
+    findMatchBtn.disabled = true;
+    leaveQueueBtn.disabled = true;
+    readyBtn.disabled = true;
+    setStatus("Offline");
+  }
+  if (message) setMenuStatus(message, mode);
+}
+
+if (backendReady && socket?.on) {
+  updateConnectionState(false, `Connecting to ${backendUrl}...`);
+  socket.on("connect", () => {
+    updateConnectionState(true, "Connected. Find a match.", "success");
+  });
+  socket.on("connect_error", (err) => {
+    updateConnectionState(false, `Connection error: ${err?.message || "unknown"}`, "danger");
+  });
+  socket.on("disconnect", (reason) => {
+    updateConnectionState(false, `Disconnected: ${reason}`, "danger");
+  });
+}
 
 const DEFAULT_TRACK = {
   tileSize: 2,
@@ -521,17 +550,29 @@ function setReadyVisible(visible) {
 }
 
 findMatchBtn.addEventListener("click", () => {
+  if (!socketConnected) {
+    setMenuStatus("Not connected to the server yet.", "danger");
+    return;
+  }
   state.playerName = playerNameInput.value.trim() || "Driver";
   socket.emit("queue:join", { name: state.playerName });
   setMenuStatus("Searching for opponent...", "success");
 });
 
 leaveQueueBtn.addEventListener("click", () => {
+  if (!socketConnected) {
+    setMenuStatus("Not connected to the server yet.", "danger");
+    return;
+  }
   socket.emit("queue:leave");
   setMenuStatus("Queue left. Ready when you are.");
 });
 
 readyBtn.addEventListener("click", () => {
+  if (!socketConnected) {
+    setMenuStatus("Not connected to the server yet.", "danger");
+    return;
+  }
   socket.emit("player:ready");
   setMenuStatus("Ready! Waiting for opponent...", "success");
   readyBtn.disabled = true;
@@ -632,7 +673,7 @@ window.addEventListener("resize", () => {
 });
 
 render();
-setStatus("Idle");
+setStatus(backendReady ? "Connecting" : "Idle");
 showMenu();
 
 if (!backendReady) {
