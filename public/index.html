@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="backend-url" content="https://YOUR_BACKEND_URL" />
+  <title>Racing56 - 1v1 Horizon Sprint</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="ui">
+    <div class="brand">RACING56</div>
+
+    <div id="statusPanel" class="panel status">
+      <div class="label">Status</div>
+      <div id="statusText" class="value">Idle</div>
+      <div id="countdownText" class="countdown"></div>
+    </div>
+
+    <div id="hud" class="panel hud">
+      <div>
+        <div class="label">Speed</div>
+        <div id="speedText" class="value">0 km/h</div>
+      </div>
+      <div>
+        <div class="label">Lap</div>
+        <div id="lapText" class="value">1 / 3</div>
+      </div>
+      <div>
+        <div class="label">Timer</div>
+        <div id="timeText" class="value">0:00.000</div>
+      </div>
+    </div>
+
+    <div id="leaderboard" class="panel leaderboard">
+      <div class="label">Drivers</div>
+      <div id="leaderList" class="leader-list"></div>
+    </div>
+
+    <div id="controlsPanel" class="panel controls">
+      <div class="label">Controls</div>
+      <div class="value">W / S - Throttle</div>
+      <div class="value">A / D - Steer</div>
+      <div class="value">Space - Handbrake</div>
+    </div>
+  </div>
+
+  <div id="menu" class="menu">
+    <div class="menu-card">
+      <h1>Racing56</h1>
+      <p class="subtitle">1v1 open-road sprint with cinematic lighting</p>
+
+      <label for="playerName">Driver name</label>
+      <input id="playerName" maxlength="16" placeholder="Nader" />
+
+      <label for="backendUrlInput">Server URL</label>
+      <div class="menu-inline">
+        <input id="backendUrlInput" placeholder="https://your-backend.onrender.com" />
+        <button id="saveBackendBtn" type="button" class="ghost">Save</button>
+      </div>
+      <p class="menu-hint">Required for multiplayer on Netlify.</p>
+
+      <div class="menu-actions">
+        <button id="findMatchBtn" class="primary">Find Match</button>
+        <button id="leaveQueueBtn" class="ghost">Leave Queue</button>
+      </div>
+
+      <button id="readyBtn" class="ready hidden">Ready</button>
+
+      <div id="menuStatus" class="menu-status">Enter a name and find a match.</div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
