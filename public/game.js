@@ -63,7 +63,12 @@ if (saveBackendBtn) {
 }
 
 const socket = backendReady
-  ? io(backendUrl, { transports: ["websocket", "polling"] })
+  ? io(backendUrl, {
+      transports: ["polling", "websocket"],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      timeout: 60000,
+    })
   : { on: () => {}, emit: () => {}, id: null };
 let socketConnected = false;
 
@@ -87,6 +92,14 @@ if (backendReady && socket?.on) {
   socket.on("connect", () => {
     updateConnectionState(true, "Connected. Find a match.", "success");
   });
+  if (socket.io?.on) {
+    socket.io.on("reconnect_attempt", () => {
+      updateConnectionState(false, "Reconnecting to server...", "danger");
+    });
+    socket.io.on("reconnect", () => {
+      updateConnectionState(true, "Reconnected. Find a match.", "success");
+    });
+  }
   socket.on("connect_error", (err) => {
     updateConnectionState(false, `Connection error: ${err?.message || "unknown"}`, "danger");
   });
@@ -556,7 +569,7 @@ findMatchBtn.addEventListener("click", () => {
   }
   state.playerName = playerNameInput.value.trim() || "Driver";
   socket.emit("queue:join", { name: state.playerName });
-  setMenuStatus("Searching for opponent...", "success");
+  setMenuStatus("Searching for opponent... Open the game in another browser/device to join.", "success");
 });
 
 leaveQueueBtn.addEventListener("click", () => {
@@ -580,7 +593,7 @@ readyBtn.addEventListener("click", () => {
 
 socket.on("queue:status", ({ status }) => {
   if (status === "waiting") {
-    setMenuStatus("Waiting in queue...", "success");
+    setMenuStatus("Waiting in queue... Open the game in another browser/device to join.", "success");
   } else {
     setMenuStatus("Queue idle.");
   }
